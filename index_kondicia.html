@@ -301,6 +301,18 @@
   </section>
 
   <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Posilňovňa — objem podľa mesiaca</h2>
+      </div>
+      <button class="table-toggle" data-table-for="volume">Tabuľka</button>
+    </div>
+    <p class="card-note">Súčet váha × opakovania × série za všetky cviky v danom mesiaci, z treningy.json. Zatiaľ len august — pribúda s každým týždenným exportom.</p>
+    <div class="chart-holder" id="volume-chart"></div>
+    <div class="table-scroll hidden" id="volume-table"></div>
+  </section>
+
+  <section class="card">
     <div class="card-head"><h2 class="card-title">Posilňovňa — cviky</h2></div>
     <p class="card-note">Tréningy A/B, exportované 14. 8. 2026 (dávka za týždeň). Garminova Sila zachytáva len súhrn tréningu, toto je detail po cvikoch.</p>
     <div class="table-scroll" id="posilnovna-table"></div>
@@ -945,6 +957,103 @@ function renderStepsTable() {
   holder.innerHTML = ''; holder.appendChild(table);
 }
 
+// ---------- Bar chart: Posilňovňa objem podľa mesiaca ----------
+function volumeByMonth() {
+  const months = ['jan','feb','mar','apr','máj','jún','júl','aug','sep','okt','nov','dec'];
+  const byKey = new Map(); // "2026-08" -> {label, total}
+  DATA.posilnovna.forEach(r => {
+    const [y, m] = r.date.split('-');
+    const key = y + '-' + m;
+    const label = months[parseInt(m,10)-1].charAt(0).toUpperCase() + months[parseInt(m,10)-1].slice(1) + ' ' + y;
+    if (!byKey.has(key)) byKey.set(key, { key, label, total: 0 });
+    byKey.get(key).total += r.volume_kg;
+  });
+  return Array.from(byKey.values()).sort((a,b) => a.key.localeCompare(b.key));
+}
+
+function renderVolume() {
+  const rows = volumeByMonth();
+  const W = 1000, H = 220, padL = 56, padR = 16, padT = 24, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const barSlot = plotW / Math.max(rows.length, 1);
+  const barW = Math.min(70, barSlot * 0.4);
+  const maxV = niceNumber(Math.max(...rows.map(r => r.total), 1));
+
+  const svg = makeSvg(W, H);
+  const svgns = svg.namespaceURI;
+
+  const gridSteps = 4;
+  for (let s = 0; s <= gridSteps; s++) {
+    const val = (maxV / gridSteps) * s;
+    const y = padT + plotH - (val / maxV) * plotH;
+    const line = document.createElementNS(svgns, 'line');
+    line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('class', s === 0 ? 'baseline' : 'grid-line');
+    svg.appendChild(line);
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', padL - 8); lab.setAttribute('y', y + 3);
+    lab.setAttribute('text-anchor', 'end'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = fmt(val,0);
+    svg.appendChild(lab);
+  }
+
+  rows.forEach((r, i) => {
+    const cx = padL + barSlot * i + barSlot/2;
+    const h = (r.total / maxV) * plotH;
+    const y = padT + plotH - h;
+    const rect = document.createElementNS(svgns, 'rect');
+    rect.setAttribute('x', cx - barW/2); rect.setAttribute('y', y);
+    rect.setAttribute('width', barW); rect.setAttribute('height', Math.max(0,h));
+    rect.setAttribute('rx', 4);
+    rect.setAttribute('fill', seriesColor(3)); // Posilňovňa farba
+    wireTooltip(rect,
+      () => {
+        const box = ttBox(r.label);
+        return ttRow(box, 'objem', fmt(r.total,0) + ' kg', seriesColor(3));
+      },
+      () => rect.style.filter = 'brightness(1.14)',
+      () => rect.style.filter = ''
+    );
+    svg.appendChild(rect);
+
+    const tlab = document.createElementNS(svgns, 'text');
+    tlab.setAttribute('x', cx); tlab.setAttribute('y', y - 8);
+    tlab.setAttribute('text-anchor', 'middle'); tlab.setAttribute('class', 'total-label');
+    tlab.textContent = fmt(r.total,0) + ' kg';
+    svg.appendChild(tlab);
+
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', cx); lab.setAttribute('y', H - padB + 18);
+    lab.setAttribute('text-anchor', 'middle'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = r.label;
+    svg.appendChild(lab);
+  });
+
+  const holder = document.getElementById('volume-chart');
+  holder.innerHTML = ''; holder.appendChild(svg);
+  renderVolumeTable(rows);
+}
+
+function renderVolumeTable(rows) {
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  ['Mesiac','Objem (kg)'].forEach(h => hr.appendChild(el('th', h)));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.appendChild(el('td', r.label));
+    tr.appendChild(el('td', fmt(r.total,0)));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  const holder = document.getElementById('volume-table');
+  holder.innerHTML = ''; holder.appendChild(table);
+}
+
 // ---------- Posilňovňa table ----------
 function renderPosilnovna() {
   const table = document.createElement('table');
@@ -1036,6 +1145,7 @@ function renderAll() {
   renderSnapshot();
   renderHR();
   renderSteps();
+  renderVolume();
   renderPosilnovna();
   renderFlags();
   renderSources();
