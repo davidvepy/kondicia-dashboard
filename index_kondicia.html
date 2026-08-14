@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kondícia — prehľad</title>
+<style>
+  :root { color-scheme: light; }
+  .viz-root {
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #d03b3b;
+    --series-1: #2a78d6; /* Beh */
+    --series-2: #eb6834; /* Bicykel */
+    --series-3: #1baf7a; /* Hokej */
+    --series-4: #eda100; /* Posilňovňa */
+    --series-5: #e87ba4; /* Chôdza */
+    --series-6: #008300; /* Vodné športy */
+    --series-7: #4a3aa7; /* Ranná aktivácia */
+    --series-8: #6b6a63; /* Nezaradené — zámerne muted, nie plná kategória */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --serious:        #ec835a;
+      --critical:       #e66767;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --series-4: #c98500;
+      --series-5: #d55181;
+      --series-6: #008300;
+      --series-7: #9085e9;
+      --series-8: #9a988f;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #9a988f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
+  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+  .subtitle { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 520px; line-height: 1.5; }
+  .meta { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+
+  .theme-toggle {
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover { color: var(--text-primary); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .stat-tile .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .stat-tile .sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+  .card-title { font-size: 15px; font-weight: 700; margin: 0; }
+  .card-note { font-size: 12px; color: var(--text-muted); margin: 4px 0 14px; line-height: 1.5; }
+
+  .seg-toggle { display: flex; gap: 4px; background: var(--page); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .seg-toggle button {
+    border: none; background: transparent; color: var(--text-secondary);
+    font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer;
+  }
+  .seg-toggle button.active { background: var(--surface-1); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px var(--border); }
+
+  .table-toggle { font-size: 12px; color: var(--text-secondary); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  .table-toggle:hover { color: var(--text-primary); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 4px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); cursor: pointer; user-select: none; }
+  .legend-item .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .legend-item.off { opacity: 0.35; }
+
+  svg { display: block; overflow: visible; font-family: inherit; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.1s;
+    z-index: 10;
+    min-width: 120px;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip .t-date { color: var(--text-muted); font-size: 11px; margin-bottom: 4px; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 1px 0; }
+  .tooltip .t-key { display: flex; align-items: center; gap: 5px; color: var(--text-secondary); }
+  .tooltip .t-line { width: 10px; height: 2px; border-radius: 1px; }
+  .tooltip .t-val { font-weight: 700; color: var(--text-primary); }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .data-table th, .data-table td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  .data-table th:first-child, .data-table td:first-child { text-align: left; }
+  .data-table td:first-child { text-align: left; }
+  .data-table th { color: var(--text-muted); font-weight: 600; }
+  .data-table td { font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .data-table.left-heavy th, .data-table.left-heavy td { text-align: left; }
+  .hidden { display: none !important; }
+
+  .src-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .src-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .src-card .src-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .src-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+  .src-status.ok { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+  .src-status.warn { color: #a8720f; background: color-mix(in srgb, var(--warning) 20%, transparent); }
+  .src-status.missing { color: var(--critical); background: color-mix(in srgb, var(--critical) 14%, transparent); }
+  .src-status.off { color: var(--text-muted); background: var(--page); }
+  .src-note { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+
+  .snapshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .snap-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .snap-item .snap-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .snap-item .snap-value { font-size: 18px; font-weight: 700; }
+  .snap-item .snap-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  .flag-list { display: flex; flex-direction: column; gap: 8px; }
+  .flag-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+  .flag-name { font-size: 13px; font-weight: 600; }
+  .flag-count { font-size: 12.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+  footer { color: var(--text-muted); font-size: 11.5px; margin-top: 20px; line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .stat-tile .value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Kondícia — prehľad</h1>
+      <p class="subtitle">Zrkadlo, nie tréner. Len to, čo je v dátach — bez skóre, bez odporúčaní. (Skóre, ktoré počítajú samotné appky — Ultrahuman, Garmin — sú ponechané tak, ako ich appka ukazuje.)</p>
+      <p class="meta" id="meta-updated"></p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button">Tmavý režim</button>
+  </header>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Aktivity podľa mesiaca</h2>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="seg-toggle" id="garmin-metric-toggle">
+          <button data-metric="counts" class="active">Počet</button>
+          <button data-metric="km">Kilometre</button>
+        </div>
+        <button class="table-toggle" data-table-for="garmin">Tabuľka</button>
+      </div>
+    </div>
+    <p class="card-note">Garmin export, február–august 2026, mesačné súčty. Hokej ani ranná aktivácia nie sú vlastné typy v Garmine/Strave — dourčené podľa dĺžky, času a názvu aktivity. Nezaradené čaká na tvoje dourčenie (nižšie).</p>
+    <div class="legend" id="garmin-legend"></div>
+    <div id="garmin-chart"></div>
+    <div id="garmin-table" class="hidden"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Ultrahuman — dnešný snímok</h2></div>
+    <p class="card-note">14. 8. 2026, ráno. Hodnoty a skóre presne tak, ako ich ukazuje appka.</p>
+    <div class="snapshot-grid" id="snapshot-grid"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Nočný tep</h2>
+      </div>
+      <button class="table-toggle" data-table-for="hr">Tabuľka</button>
+    </div>
+    <p class="card-note">Medián tepu v okne 23:00–06:00, pripísaný k rannému dátumu. Ultrahuman prsteň, 6.–14. 8. 2026. 6. 8. bez nočnej hodnoty — prsteň nasadený až cez deň. 14. 8. je zo screenshotu, ten túto metriku neukazuje.</p>
+    <div id="hr-chart"></div>
+    <div id="hr-table" class="hidden"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Kroky za deň</h2>
+      </div>
+      <button class="table-toggle" data-table-for="steps">Tabuľka</button>
+    </div>
+    <p class="card-note">Súčet za deň, Ultrahuman. 6. 8. je neúplný deň (prsteň nasadený až cez deň).</p>
+    <div id="steps-chart"></div>
+    <div id="steps-table" class="hidden"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Posilňovňa — cviky</h2></div>
+    <p class="card-note">Tréningy A/B, exportované 14. 8. 2026 (dávka za týždeň). Garminova Sila zachytáva len súhrn tréningu, toto je detail po cvikoch.</p>
+    <div id="posilnovna-table"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Nezaradené na dourčenie</h2></div>
+    <p class="card-note">Generické názvy z Garminu, ktoré pravidlá nevedia zaradiť. Povedz mi, ako ich mám odteraz klasifikovať.</p>
+    <div class="flag-list" id="flag-list"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Zdroje</h2></div>
+    <p class="card-note">Stav pripojenia jednotlivých zdrojov k tomuto prehľadu.</p>
+    <div class="src-grid" id="src-grid"></div>
+  </section>
+
+  <footer id="footer-note"></footer>
+
+</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {
+ "garmin": {
+  "months": ["Feb","Mar","Apr","Máj","Jún","Júl","Aug"],
+  "types": ["Beh","Bicykel","Hokej","Posilňovňa","Chôdza","Vodné športy","Ranná aktivácia","Nezaradené"],
+  "counts": [
+   [0,0,5,0,0,0,0,0],
+   [0,2,13,0,8,0,0,2],
+   [0,0,5,0,1,0,0,3],
+   [5,1,2,1,0,0,0,2],
+   [7,0,2,5,0,8,0,0],
+   [10,1,2,7,19,5,15,21],
+   [4,3,2,5,7,0,6,1]
+  ],
+  "km": [
+   [0,0,11.11,0,0,0,0,0],
+   [0,7.4,25.12,0,20.13,0,0,0.0],
+   [0,0,8.99,0,3.73,0,0,0.0],
+   [24.11,6.1,6.53,0.0,0,0,0,0.0],
+   [29.21,0,6.43,0.0,0,14.02,0,0],
+   [46.58,21.78,0.0,0.0,56.58,7.52,3.64,0.0],
+   [19.07,41.25,0.0,0.0,20.23,0,1.16,0.0]
+  ]
+ },
+ "regen": [
+  {"date":"2026-08-06","night_hr":null,"night_hr_min":null,"day_hr_avg":69.5,"steps":4917,"temp_avg":34.6,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-07","night_hr":52.0,"night_hr_min":47.0,"day_hr_avg":63.3,"steps":8783,"temp_avg":34.0,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-08","night_hr":53.0,"night_hr_min":40.0,"day_hr_avg":61.7,"steps":11724,"temp_avg":34.1,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-09","night_hr":52.0,"night_hr_min":45.0,"day_hr_avg":62.0,"steps":7973,"temp_avg":33.8,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-10","night_hr":52.5,"night_hr_min":48.0,"day_hr_avg":63.7,"steps":7781,"temp_avg":33.8,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-11","night_hr":53.0,"night_hr_min":48.0,"day_hr_avg":64.2,"steps":6158,"temp_avg":34.2,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-12","night_hr":54.0,"night_hr_min":49.0,"day_hr_avg":62.5,"steps":3612,"temp_avg":34.1,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-13","night_hr":53.0,"night_hr_min":49.0,"day_hr_avg":62.0,"steps":6625,"temp_avg":34.4,"hrv_ms":null,"rhr":null,"sleep_score":null,"recovery_score":null,"regen_capacity":null,"vo2max":null,"sleep_total":null,"zdroj":"ring_data_export"},
+  {"date":"2026-08-14","night_hr":null,"night_hr_min":null,"day_hr_avg":null,"steps":5949,"temp_avg":35.33,"hrv_ms":108.0,"rhr":48.0,"sleep_score":"89","recovery_score":"92","regen_capacity":"53","vo2max":"50","sleep_total":"9h 4min","zdroj":"ultrahuman_screenshot"}
+ ],
+ "posilnovna": [
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Ťažké ťahy","exercise":"Sťahovanie hornej kladky","weight_kg":59.0,"reps":"8|8|8","sets":3,"volume_kg":1416.0,"note":"Nábeh 45 kg. Všetky série na horný koniec — nabudúce 63 kg."},
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Ťažké ťahy","exercise":"Príťahy v predklone","weight_kg":22.5,"reps":"10|10|10","sets":3,"volume_kg":675.0,"note":"Jednoručne, iné fitko. Nabudúce 25 kg."},
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Superset 1","exercise":"Reverzné rozpažovanie","weight_kg":7.0,"reps":"15|15|15|15","sets":4,"volume_kg":420.0,"note":"Jednoručky. Posledné dve opakovania ťažšie."},
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Superset 1","exercise":"Biceps kladivovým úchopom","weight_kg":17.5,"reps":"10|10|10|10","sets":4,"volume_kg":700.0,"note":"Bez prepadu — nabudúce 20 kg."},
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Superset 2","exercise":"Sťahovanie kladky vystretými rukami","weight_kg":25.0,"reps":"13|10","sets":2,"volume_kg":575.0,"note":"Skákal som medzi 25 a 18 kg. Zjednotiť na 20 kg × 4."},
+  {"date":"2026-08-13","day":"štvrtok","training":"Tréning B","group":"Superset 2","exercise":"Biceps na kazateľskej lavici","weight_kg":25.0,"reps":"10|10|10","sets":3,"volume_kg":750.0,"note":"Biceps na kladke. Posledné dve opakovania ťažšie."},
+  {"date":"2026-08-11","day":"utorok","training":"Tréning A","group":"Ťažké tlaky","exercise":"Tlaky na rovnej lavičke","weight_kg":55.0,"reps":"8|6","sets":2,"volume_kg":770.0,"note":"Nábeh 45 a 50 kg. Pracovná váha nabudúce 50 kg."},
+  {"date":"2026-08-11","day":"utorok","training":"Tréning A","group":"Ťažké tlaky","exercise":"Tlaky na šikmej lavičke","weight_kg":50.0,"reps":"8|6|5","sets":3,"volume_kg":950.0,"note":"Veľká činka. Prepad — nabudúce jednoručky 18 kg."},
+  {"date":"2026-08-11","day":"utorok","training":"Tréning A","group":"Superset 1","exercise":"Upažovanie s jednoručkami","weight_kg":10.0,"reps":"15|12|12|10","sets":4,"volume_kg":490.0,"note":"Prvá séria rozcvičková na 8 kg."},
+  {"date":"2026-08-11","day":"utorok","training":"Tréning A","group":"Superset 1","exercise":"Triceps na kladke s lanom","weight_kg":20.0,"reps":"15|12|12|9","sets":4,"volume_kg":960.0,"note":"Skúsená 22,5 kg, bola veľa. Zostať na 20."},
+  {"date":"2026-08-11","day":"utorok","training":"Tréning A","group":"Stehná","exercise":"Leg Press","weight_kg":30.0,"reps":"12|12|12","sets":3,"volume_kg":1080.0,"note":"Drepy s vrecom namiesto leg pressu."}
+ ],
+ "snapshot": {"date":"2026-08-14","sleep_score":89,"sleep_total":"9h 4min","sleep_efficiency":92,"rem":"3h 48min","deep":"1h 24min","light":"3h 52min","hrv":108,"rhr":48,"recovery_score":92,"regen_capacity":53,"temp_dev":0.07,"vo2max":50,"steps":5949},
+ "nezaradene": {"JumpJump": 21, "HIIT": 7, "Stick mobility": 1}
+};
+
+const SERIES_VARS = ['--series-1','--series-2','--series-3','--series-4','--series-5','--series-6','--series-7','--series-8'];
+function seriesColor(i) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(SERIES_VARS[i]).trim();
+}
+function cssVar(name) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
+}
+
+// ---------- theme toggle ----------
+const themeBtn = document.getElementById('theme-toggle');
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? 'Svetlý režim' : 'Tmavý režim';
+  renderAll();
+}
+themeBtn.addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+themeBtn.textContent = currentTheme() === 'dark' ? 'Svetlý režim' : 'Tmavý režim';
+
+// ---------- meta ----------
+document.getElementById('meta-updated').textContent = 'Naposledy aktualizované: 14. 8. 2026 (testovací beh, prvé screenshoty)';
+document.getElementById('footer-note').textContent = 'Garmin: plný export aktivít, 180 záznamov, február–august 2026. Ultrahuman: ranný screenshot, 6.–14. 8. 2026. Tréningy A/B: treningy.json, dávka 6.–13. 8. 2026. Dashboard je statický snímok k 14. 8. 2026 — obnoví sa pri ďalšom behu.';
+
+// ---------- stat tiles ----------
+function fmt(n, d=0) { return n.toLocaleString('sk-SK', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+
+function renderStats() {
+  const g = DATA.garmin;
+  let totalCount = 0, hockeyCount = 0;
+  g.counts.forEach((row, mi) => row.forEach((v, ti) => {
+    totalCount += v;
+    if (g.types[ti] === 'Hokej') hockeyCount += v;
+  }));
+  const nights = DATA.regen.filter(d => d.night_hr != null).map(d => d.night_hr);
+  const avgNight = nights.reduce((a,b)=>a+b,0) / nights.length;
+  const steps = DATA.regen.map(d => d.steps);
+  const avgSteps = steps.reduce((a,b)=>a+b,0) / steps.length;
+
+  const tiles = [
+    { label: 'Aktivít spolu', value: fmt(totalCount), sub: 'február–august, Garmin' },
+    { label: 'Odohratých hokejov', value: fmt(hockeyCount), sub: 'február–august, Garmin' },
+    { label: 'Priemerný nočný tep', value: fmt(avgNight,1), sub: nights.length + ' nocí, Ultrahuman' },
+    { label: 'Priemer krokov / deň', value: fmt(avgSteps,0), sub: steps.length + ' dní, Ultrahuman' },
+  ];
+  const row = document.getElementById('stat-row');
+  row.innerHTML = '';
+  tiles.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'stat-tile';
+    const lab = document.createElement('div'); lab.className='label'; lab.textContent = t.label;
+    const val = document.createElement('div'); val.className='value'; val.textContent = t.value;
+    const sub = document.createElement('div'); sub.className='sub'; sub.textContent = t.sub;
+    el.append(lab, val, sub);
+    row.appendChild(el);
+  });
+}
+
+// ---------- tooltip helper ----------
+const tooltipEl = document.getElementById('tooltip');
+function showTooltip(x, y, html) {
+  tooltipEl.innerHTML = '';
+  tooltipEl.appendChild(html);
+  tooltipEl.style.left = (x + 14) + 'px';
+  tooltipEl.style.top = (y - 10) + 'px';
+  tooltipEl.classList.add('show');
+}
+function hideTooltip() { tooltipEl.classList.remove('show'); }
+
+// ---------- SVG stacked bar: Garmin ----------
+let garminMetric = 'counts';
+let garminHidden = new Set();
+
+function renderGarminLegend() {
+  const el = document.getElementById('garmin-legend');
+  el.innerHTML = '';
+  DATA.garmin.types.forEach((t, i) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item' + (garminHidden.has(i) ? ' off' : '');
+    const sw = document.createElement('span'); sw.className = 'swatch'; sw.style.background = seriesColor(i);
+    const lab = document.createElement('span'); lab.textContent = t;
+    item.append(sw, lab);
+    item.addEventListener('click', () => {
+      if (garminHidden.has(i)) garminHidden.delete(i); else garminHidden.add(i);
+      renderGarmin();
+    });
+    el.appendChild(item);
+  });
+}
+
+function renderGarmin() {
+  renderGarminLegend();
+  const g = DATA.garmin;
+  const dataset = g[garminMetric]; // months x types
+  const W = 1000, H = 300, padL = 44, padR = 12, padT = 10, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const nMonths = g.months.length;
+  const barSlot = plotW / nMonths;
+  const barW = Math.min(24, barSlot * 0.5);
+
+  const totals = dataset.map(row => row.reduce((a,v,ti) => garminHidden.has(ti) ? a : a+v, 0));
+  const maxTotal = Math.max(...totals, 1);
+  const niceMax = niceNumber(maxTotal);
+  const yScale = v => plotH - (v / niceMax) * plotH;
+
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', H);
+
+  const gridSteps = 4;
+  for (let s = 0; s <= gridSteps; s++) {
+    const val = (niceMax / gridSteps) * s;
+    const y = padT + yScale(val);
+    const line = document.createElementNS(svgns, 'line');
+    line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('class', s === 0 ? 'baseline' : 'grid-line');
+    svg.appendChild(line);
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', padL - 8); lab.setAttribute('y', y + 3);
+    lab.setAttribute('text-anchor', 'end'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = garminMetric === 'km' ? fmt(val,0) : fmt(val,0);
+    svg.appendChild(lab);
+  }
+
+  dataset.forEach((row, mi) => {
+    const cx = padL + barSlot * mi + barSlot / 2;
+    let yCursor = plotH;
+    row.forEach((v, ti) => {
+      if (garminHidden.has(ti) || v <= 0) return;
+      const segH = Math.max(0, (v / niceMax) * plotH - 2); // 2px surface gap
+      const y = padT + yCursor - (v / niceMax) * plotH;
+      const isTop = ti === row.length - 1 || row.slice(ti+1).every((vv,jj) => garminHidden.has(ti+1+jj) || vv <= 0);
+      const rect = document.createElementNS(svgns, 'rect');
+      rect.setAttribute('x', cx - barW/2);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', barW);
+      rect.setAttribute('height', segH);
+      rect.setAttribute('rx', isTop ? 4 : 0);
+      rect.setAttribute('fill', seriesColor(ti));
+      rect.style.cursor = 'pointer';
+      rect.addEventListener('pointerenter', (e) => {
+        rect.style.filter = 'brightness(1.12)';
+        const box = document.createElement('div');
+        const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = g.months[mi] + ' 2026 — ' + g.types[ti];
+        const rw = document.createElement('div'); rw.className='t-row';
+        const val = document.createElement('span'); val.className='t-val';
+        val.textContent = garminMetric === 'km' ? fmt(v,2) + ' km' : fmt(v,0) + 'x';
+        rw.appendChild(val);
+        box.append(dt, rw);
+        showTooltip(e.clientX, e.clientY, box);
+      });
+      rect.addEventListener('pointermove', (e) => {
+        tooltipEl.style.left = (e.clientX + 14) + 'px';
+        tooltipEl.style.top = (e.clientY - 10) + 'px';
+      });
+      rect.addEventListener('pointerleave', () => { rect.style.filter = ''; hideTooltip(); });
+      svg.appendChild(rect);
+      yCursor -= (v / niceMax) * plotH;
+    });
+
+    const mlab = document.createElementNS(svgns, 'text');
+    mlab.setAttribute('x', cx); mlab.setAttribute('y', H - padB + 18);
+    mlab.setAttribute('text-anchor', 'middle'); mlab.setAttribute('class', 'axis-label');
+    mlab.textContent = g.months[mi];
+    svg.appendChild(mlab);
+  });
+
+  const holder = document.getElementById('garmin-chart');
+  holder.innerHTML = '';
+  holder.appendChild(svg);
+
+  renderGarminTable();
+}
+
+function renderGarminTable() {
+  const g = DATA.garmin;
+  const dataset = g[garminMetric];
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  hr.appendChild(el('th', 'Mesiac'));
+  g.types.forEach(t => hr.appendChild(el('th', t)));
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  dataset.forEach((row, mi) => {
+    const tr = document.createElement('tr');
+    tr.appendChild(el('td', g.months[mi] + ' 2026'));
+    row.forEach(v => tr.appendChild(el('td', garminMetric === 'km' ? fmt(v,2) : fmt(v,0))));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  const holder = document.getElementById('garmin-table');
+  holder.innerHTML = '';
+  holder.appendChild(table);
+}
+
+function el(tag, text) { const e = document.createElement(tag); e.textContent = text; return e; }
+
+function niceNumber(v) {
+  if (v <= 5) return 5;
+  const pow = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / pow;
+  let f;
+  if (n <= 1) f = 1; else if (n <= 2) f = 2; else if (n <= 5) f = 5; else f = 10;
+  return f * pow;
+}
+
+document.getElementById('garmin-metric-toggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-metric]');
+  if (!btn) return;
+  garminMetric = btn.dataset.metric;
+  document.querySelectorAll('#garmin-metric-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  renderGarmin();
+});
+
+// ---------- Ultrahuman snapshot ----------
+function renderSnapshot() {
+  const s = DATA.snapshot;
+  const items = [
+    { label: 'Skóre spánku', value: s.sleep_score, sub: s.sleep_total + ' · efektivita ' + s.sleep_efficiency + '%' },
+    { label: 'REM / hlboký / ľahký', value: s.rem, sub: s.deep + ' hlboký · ' + s.light + ' ľahký' },
+    { label: 'Skóre zotavenia', value: s.recovery_score, sub: 'appka Ultrahuman' },
+    { label: 'Regeneračná schopnosť', value: s.regen_capacity + '%', sub: 'appka Ultrahuman' },
+    { label: 'HRV', value: s.hrv + ' ms', sub: '' },
+    { label: 'Pokojový tep', value: s.rhr + ' bpm', sub: '' },
+    { label: 'VO2 max', value: s.vo2max, sub: 'appka Ultrahuman' },
+    { label: 'Odchýlka teploty', value: (s.temp_dev > 0 ? '+' : '') + s.temp_dev + ' °C', sub: '' },
+    { label: 'Kroky (doteraz)', value: fmt(s.steps,0), sub: '' },
+  ];
+  const grid = document.getElementById('snapshot-grid');
+  grid.innerHTML = '';
+  items.forEach(it => {
+    const card = document.createElement('div'); card.className = 'snap-item';
+    const lab = document.createElement('div'); lab.className='snap-label'; lab.textContent = it.label;
+    const val = document.createElement('div'); val.className='snap-value'; val.textContent = it.value;
+    card.append(lab, val);
+    if (it.sub) { const sub = document.createElement('div'); sub.className='snap-sub'; sub.textContent = it.sub; card.appendChild(sub); }
+    grid.appendChild(card);
+  });
+}
+
+// ---------- Line chart: night HR ----------
+function renderHR() {
+  const rows = DATA.regen;
+  const W = 1000, H = 260, padL = 40, padR = 16, padT = 16, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const withNight = rows.filter(r => r.night_hr != null);
+  const vals = withNight.map(r => r.night_hr);
+  const minV = Math.floor(Math.min(...vals) - 2);
+  const maxV = Math.ceil(Math.max(...vals) + 2);
+  const xScale = i => padL + (i / (rows.length - 1)) * plotW;
+  const yScale = v => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
+
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+
+  const steps = 4;
+  for (let s = 0; s <= steps; s++) {
+    const val = minV + ((maxV - minV) / steps) * s;
+    const y = yScale(val);
+    const line = document.createElementNS(svgns, 'line');
+    line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('class', 'grid-line');
+    svg.appendChild(line);
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', padL - 8); lab.setAttribute('y', y + 3);
+    lab.setAttribute('text-anchor', 'end'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = fmt(val,0);
+    svg.appendChild(lab);
+  }
+
+  let pathD = '';
+  const pts = [];
+  rows.forEach((r, i) => {
+    if (r.night_hr == null) return;
+    const x = xScale(i), y = yScale(r.night_hr);
+    pts.push([x,y,i,r]);
+    pathD += (pathD === '' ? 'M' : 'L') + x + ' ' + y + ' ';
+  });
+  const path = document.createElementNS(svgns, 'path');
+  path.setAttribute('d', pathD.trim());
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', seriesColor(0));
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(path);
+
+  pts.forEach(([x,y,i,r]) => {
+    const ring = document.createElementNS(svgns, 'circle');
+    ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 6);
+    ring.setAttribute('fill', cssVar('--surface-1'));
+    svg.appendChild(ring);
+    const dot = document.createElementNS(svgns, 'circle');
+    dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 4);
+    dot.setAttribute('fill', seriesColor(0));
+    svg.appendChild(dot);
+    const hit = document.createElementNS(svgns, 'circle');
+    hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 14);
+    hit.setAttribute('fill', 'transparent'); hit.style.cursor = 'pointer';
+    hit.addEventListener('pointerenter', (e) => {
+      const box = document.createElement('div');
+      const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = fmtDate(r.date);
+      const rw = document.createElement('div'); rw.className='t-row';
+      const key = document.createElement('span'); key.className='t-key';
+      const ln = document.createElement('span'); ln.className='t-line'; ln.style.background = seriesColor(0);
+      key.append(ln, document.createTextNode('medián'));
+      const val = document.createElement('span'); val.className='t-val'; val.textContent = fmt(r.night_hr,1) + ' bpm';
+      rw.append(key, val);
+      const rw2 = document.createElement('div'); rw2.className='t-row';
+      const key2 = document.createElement('span'); key2.className='t-key'; key2.textContent = 'minimum';
+      const val2 = document.createElement('span'); val2.className='t-val'; val2.textContent = fmt(r.night_hr_min,0) + ' bpm';
+      rw2.append(key2, val2);
+      box.append(dt, rw, rw2);
+      showTooltip(e.clientX, e.clientY, box);
+    });
+    hit.addEventListener('pointermove', (e) => {
+      tooltipEl.style.left = (e.clientX + 14) + 'px'; tooltipEl.style.top = (e.clientY - 10) + 'px';
+    });
+    hit.addEventListener('pointerleave', hideTooltip);
+    svg.appendChild(hit);
+  });
+
+  rows.forEach((r, i) => {
+    if (i % Math.ceil(rows.length / 9) !== 0 && i !== rows.length - 1) return;
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', xScale(i)); lab.setAttribute('y', H - padB + 18);
+    lab.setAttribute('text-anchor', 'middle'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = fmtDateShort(r.date);
+    svg.appendChild(lab);
+  });
+
+  const holder = document.getElementById('hr-chart');
+  holder.innerHTML = ''; holder.appendChild(svg);
+  renderHRTable();
+}
+
+function renderHRTable() {
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  ['Dátum','Medián (bpm)','Minimum (bpm)'].forEach(h => hr.appendChild(el('th', h)));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  DATA.regen.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.appendChild(el('td', fmtDate(r.date)));
+    tr.appendChild(el('td', r.night_hr != null ? fmt(r.night_hr,1) : '—'));
+    tr.appendChild(el('td', r.night_hr_min != null ? fmt(r.night_hr_min,0) : '—'));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  const holder = document.getElementById('hr-table');
+  holder.innerHTML = ''; holder.appendChild(table);
+}
+
+// ---------- Bar chart: steps ----------
+function renderSteps() {
+  const rows = DATA.regen;
+  const W = 1000, H = 260, padL = 52, padR = 16, padT = 10, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const barSlot = plotW / rows.length;
+  const barW = Math.min(24, barSlot * 0.55);
+  const maxV = niceNumber(Math.max(...rows.map(r => r.steps)));
+
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+
+  const steps4 = 4;
+  for (let s = 0; s <= steps4; s++) {
+    const val = (maxV / steps4) * s;
+    const y = padT + plotH - (val / maxV) * plotH;
+    const line = document.createElementNS(svgns, 'line');
+    line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('class', s === 0 ? 'baseline' : 'grid-line');
+    svg.appendChild(line);
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', padL - 8); lab.setAttribute('y', y + 3);
+    lab.setAttribute('text-anchor', 'end'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = fmt(val,0);
+    svg.appendChild(lab);
+  }
+
+  rows.forEach((r, i) => {
+    const cx = padL + barSlot * i + barSlot/2;
+    const h = (r.steps / maxV) * plotH;
+    const y = padT + plotH - h;
+    const rect = document.createElementNS(svgns, 'rect');
+    rect.setAttribute('x', cx - barW/2); rect.setAttribute('y', y);
+    rect.setAttribute('width', barW); rect.setAttribute('height', Math.max(0,h));
+    rect.setAttribute('rx', 4);
+    rect.setAttribute('fill', seriesColor(0));
+    rect.style.cursor = 'pointer';
+    rect.addEventListener('pointerenter', (e) => {
+      rect.style.filter = 'brightness(1.12)';
+      const box = document.createElement('div');
+      const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = fmtDate(r.date);
+      const rw = document.createElement('div'); rw.className='t-row';
+      const val = document.createElement('span'); val.className='t-val'; val.textContent = fmt(r.steps,0) + ' krokov';
+      rw.appendChild(val);
+      box.append(dt, rw);
+      showTooltip(e.clientX, e.clientY, box);
+    });
+    rect.addEventListener('pointermove', (e) => {
+      tooltipEl.style.left = (e.clientX + 14) + 'px'; tooltipEl.style.top = (e.clientY - 10) + 'px';
+    });
+    rect.addEventListener('pointerleave', () => { rect.style.filter=''; hideTooltip(); });
+    svg.appendChild(rect);
+
+    const lab = document.createElementNS(svgns, 'text');
+    lab.setAttribute('x', cx); lab.setAttribute('y', H - padB + 18);
+    lab.setAttribute('text-anchor', 'middle'); lab.setAttribute('class', 'axis-label');
+    lab.textContent = fmtDateShort(r.date);
+    svg.appendChild(lab);
+  });
+
+  const holder = document.getElementById('steps-chart');
+  holder.innerHTML = ''; holder.appendChild(svg);
+  renderStepsTable();
+}
+
+function renderStepsTable() {
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  ['Dátum','Kroky'].forEach(h => hr.appendChild(el('th', h)));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  DATA.regen.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.appendChild(el('td', fmtDate(r.date)));
+    tr.appendChild(el('td', fmt(r.steps,0)));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  const holder = document.getElementById('steps-table');
+  holder.innerHTML = ''; holder.appendChild(table);
+}
+
+// ---------- Posilňovňa table ----------
+function renderPosilnovna() {
+  const table = document.createElement('table');
+  table.className = 'data-table left-heavy';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  ['Dátum','Tréning','Skupina','Cvik','Váha (kg)','Opakovania','Série','Objem (kg)','Poznámka'].forEach(h => hr.appendChild(el('th', h)));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  DATA.posilnovna.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.appendChild(el('td', fmtDate(r.date) + ' (' + r.day + ')'));
+    tr.appendChild(el('td', r.training));
+    tr.appendChild(el('td', r.group));
+    tr.appendChild(el('td', r.exercise));
+    tr.appendChild(el('td', fmt(r.weight_kg,1)));
+    tr.appendChild(el('td', r.reps));
+    tr.appendChild(el('td', fmt(r.sets,0)));
+    tr.appendChild(el('td', fmt(r.volume_kg,0)));
+    tr.appendChild(el('td', r.note));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  const holder = document.getElementById('posilnovna-table');
+  holder.innerHTML = ''; holder.appendChild(table);
+}
+
+// ---------- Nezaradené flags ----------
+function renderFlags() {
+  const list = document.getElementById('flag-list');
+  list.innerHTML = '';
+  Object.entries(DATA.nezaradene).forEach(([name, count]) => {
+    const row = document.createElement('div'); row.className = 'flag-row';
+    const nm = document.createElement('div'); nm.className = 'flag-name'; nm.textContent = name;
+    const ct = document.createElement('div'); ct.className = 'flag-count'; ct.textContent = count + 'x';
+    row.append(nm, ct);
+    list.appendChild(row);
+  });
+}
+
+function fmtDate(iso) {
+  const [y,m,d] = iso.split('-');
+  const months = ['jan','feb','mar','apr','máj','jún','júl','aug','sep','okt','nov','dec'];
+  return d + '. ' + months[parseInt(m,10)-1] + ' ' + y;
+}
+function fmtDateShort(iso) {
+  const [y,m,d] = iso.split('-');
+  return d + '.' + m + '.';
+}
+
+// ---------- table toggles ----------
+document.querySelectorAll('.table-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.tableFor;
+    const chart = document.getElementById(key === 'garmin' ? 'garmin-chart' : key + '-chart');
+    const table = document.getElementById(key === 'garmin' ? 'garmin-table' : key + '-table');
+    const showingTable = !table.classList.contains('hidden');
+    if (showingTable) {
+      table.classList.add('hidden'); chart.classList.remove('hidden'); btn.textContent = 'Tabuľka';
+    } else {
+      table.classList.remove('hidden'); chart.classList.add('hidden'); btn.textContent = 'Graf';
+    }
+  });
+});
+
+// ---------- sources ----------
+function renderSources() {
+  const sources = [
+    { name: 'Garmin', status: 'ok', statusText: 'aktívny', note: 'Plný export aktivít, 180 záznamov, február–august 2026. Ďalej sa dopĺňa manuálnym screenshotom.' },
+    { name: 'Ultrahuman', status: 'ok', statusText: 'denný screenshot', note: 'Ráno posielaš snímok appky, priečinok Denné na Drive. 6.–14. 8. 2026, 9 dní.' },
+    { name: 'Tréningy A/B', status: 'ok', statusText: 'týždenne', note: 'treningy.json, exportuje sa dávkovo na konci týždňa, detail po cvikoch.' },
+    { name: 'Strava', status: 'off', statusText: 'vedome nepoužívaná', note: 'Rozhodnutie: dáta idú cez ručné screenshoty a exporty, nie cez API.' },
+  ];
+  const grid = document.getElementById('src-grid');
+  grid.innerHTML = '';
+  sources.forEach(s => {
+    const card = document.createElement('div'); card.className = 'src-card';
+    const name = document.createElement('div'); name.className = 'src-name'; name.textContent = s.name;
+    const status = document.createElement('span'); status.className = 'src-status ' + s.status; status.textContent = s.statusText;
+    const note = document.createElement('div'); note.className = 'src-note'; note.textContent = s.note;
+    card.append(name, status, note);
+    grid.appendChild(card);
+  });
+}
+
+function renderAll() {
+  renderStats();
+  renderGarmin();
+  renderSnapshot();
+  renderHR();
+  renderSteps();
+  renderPosilnovna();
+  renderFlags();
+  renderSources();
+}
+renderAll();
+window.addEventListener('resize', () => {});
+</script>
+</body>
+</html>
