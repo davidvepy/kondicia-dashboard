@@ -2,7 +2,10 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9f9f7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d">
+<link rel="icon" href="data:,">
 <title>Kondícia — prehľad</title>
 <style>
   :root { color-scheme: light; }
@@ -15,6 +18,7 @@
     --grid:           #e1e0d9;
     --baseline:       #c3c2b7;
     --border:         rgba(11,11,11,0.10);
+    --shadow:         0 1px 2px rgba(11,11,11,0.04), 0 1px 10px rgba(11,11,11,0.03);
     --good:           #0ca30c;
     --warning:        #fab219;
     --serious:        #ec835a;
@@ -39,6 +43,7 @@
       --grid:           #2c2c2a;
       --baseline:       #383835;
       --border:         rgba(255,255,255,0.10);
+      --shadow:         0 1px 2px rgba(0,0,0,0.25), 0 1px 12px rgba(0,0,0,0.22);
       --good:           #0ca30c;
       --warning:        #fab219;
       --serious:        #ec835a;
@@ -63,6 +68,7 @@
     --grid:           #2c2c2a;
     --baseline:       #383835;
     --border:         rgba(255,255,255,0.10);
+    --shadow:         0 1px 2px rgba(0,0,0,0.25), 0 1px 12px rgba(0,0,0,0.22);
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
@@ -73,17 +79,19 @@
     --series-8: #9a988f;
   }
 
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
     background: var(--page);
     color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 60px; }
+  @media (min-width: 640px) { .wrap { padding: 28px 20px 60px; } }
 
-  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
-  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  h1 { font-size: 21px; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.01em; }
   .subtitle { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 520px; line-height: 1.5; }
   .meta { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
 
@@ -92,111 +100,139 @@
     background: var(--surface-1);
     color: var(--text-secondary);
     border-radius: 8px;
-    padding: 7px 12px;
+    padding: 8px 13px;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: var(--shadow);
+    transition: color 0.12s;
   }
   .theme-toggle:hover { color: var(--text-primary); }
+  .theme-toggle:active { transform: translateY(1px); }
 
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
   .stat-tile {
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
   }
-  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
-  .stat-tile .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .stat-tile .label { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.3; }
+  .stat-tile .value { font-size: 26px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
   .stat-tile .sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 
   .card {
     background: var(--surface-1);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 18px;
+    border-radius: 14px;
+    padding: 18px 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
   }
+  @media (min-width: 640px) { .card { padding: 20px 22px 22px; } }
   .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
-  .card-title { font-size: 15px; font-weight: 700; margin: 0; }
-  .card-note { font-size: 12px; color: var(--text-muted); margin: 4px 0 14px; line-height: 1.5; }
+  .card-title { font-size: 15px; font-weight: 700; margin: 0; letter-spacing: -0.005em; }
+  .card-note { font-size: 12px; color: var(--text-muted); margin: 4px 0 14px; line-height: 1.55; }
 
   .seg-toggle { display: flex; gap: 4px; background: var(--page); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
   .seg-toggle button {
     border: none; background: transparent; color: var(--text-secondary);
-    font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; padding: 6px 11px; border-radius: 6px; cursor: pointer; font-weight: 500;
   }
   .seg-toggle button.active { background: var(--surface-1); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 2px var(--border); }
 
-  .table-toggle { font-size: 12px; color: var(--text-secondary); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  .table-toggle { font-size: 12px; font-weight: 500; color: var(--text-secondary); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
   .table-toggle:hover { color: var(--text-primary); }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 4px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); cursor: pointer; user-select: none; }
-  .legend-item .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
-  .legend-item.off { opacity: 0.35; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary);
+    cursor: pointer; user-select: none; padding: 4px 8px 4px 6px; border-radius: 20px;
+    transition: background 0.12s, opacity 0.12s;
+  }
+  .legend-item:hover { background: var(--page); }
+  .legend-item:focus-visible { outline: 2px solid var(--series-1); outline-offset: 1px; }
+  .legend-item .swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend-item.off { opacity: 0.4; }
+  .legend-item.off .swatch { opacity: 0.5; }
 
-  svg { display: block; overflow: visible; font-family: inherit; }
+  svg { display: block; overflow: visible; font-family: inherit; width: 100%; height: auto; }
   .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .total-label { fill: var(--text-secondary); font-size: 11px; font-weight: 600; }
   .grid-line { stroke: var(--grid); stroke-width: 1; }
   .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .chart-holder { -webkit-tap-highlight-color: transparent; touch-action: pan-y; }
 
   .tooltip {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     background: var(--surface-1);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 12.5px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
     opacity: 0;
-    transition: opacity 0.1s;
-    z-index: 10;
-    min-width: 120px;
+    transform: translateY(2px);
+    transition: opacity 0.1s, transform 0.1s;
+    z-index: 30;
+    min-width: 130px;
+    max-width: 240px;
   }
-  .tooltip.show { opacity: 1; }
-  .tooltip .t-date { color: var(--text-muted); font-size: 11px; margin-bottom: 4px; }
-  .tooltip .t-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 1px 0; }
-  .tooltip .t-key { display: flex; align-items: center; gap: 5px; color: var(--text-secondary); }
-  .tooltip .t-line { width: 10px; height: 2px; border-radius: 1px; }
-  .tooltip .t-val { font-weight: 700; color: var(--text-primary); }
+  .tooltip.show { opacity: 1; transform: translateY(0); }
+  .tooltip .t-date { color: var(--text-muted); font-size: 11px; margin-bottom: 5px; font-weight: 600; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; align-items: center; padding: 2px 0; }
+  .tooltip .t-key { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+  .tooltip .t-line { width: 10px; height: 2px; border-radius: 1px; flex: none; }
+  .tooltip .t-swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .tooltip .t-val { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  .data-table th, .data-table td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -2px; padding: 0 2px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 480px; }
+  .data-table th, .data-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
   .data-table th:first-child, .data-table td:first-child { text-align: left; }
-  .data-table td:first-child { text-align: left; }
-  .data-table th { color: var(--text-muted); font-weight: 600; }
+  .data-table th { color: var(--text-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; }
   .data-table td { font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .data-table tbody tr:hover { background: var(--page); }
   .data-table.left-heavy th, .data-table.left-heavy td { text-align: left; }
+  .data-table.left-heavy td:nth-child(5),
+  .data-table.left-heavy td:nth-child(6),
+  .data-table.left-heavy td:nth-child(7),
+  .data-table.left-heavy td:nth-child(8) { text-align: right; }
+  .data-table.left-heavy td:last-child { color: var(--text-secondary); }
+  .data-table.left-heavy { min-width: 920px; }
   .hidden { display: none !important; }
 
-  .src-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .src-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
   .src-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-  .src-card .src-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-  .src-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+  .src-card .src-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .src-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px; margin-bottom: 7px; }
+  .src-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .src-status.ok { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
   .src-status.warn { color: #a8720f; background: color-mix(in srgb, var(--warning) 20%, transparent); }
   .src-status.missing { color: var(--critical); background: color-mix(in srgb, var(--critical) 14%, transparent); }
   .src-status.off { color: var(--text-muted); background: var(--page); }
-  .src-note { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+  .src-note { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 
-  .snapshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-  .snap-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-  .snap-item .snap-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-  .snap-item .snap-value { font-size: 18px; font-weight: 700; }
-  .snap-item .snap-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .snapshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .snap-item { border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+  .snap-item .snap-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; line-height: 1.3; }
+  .snap-item .snap-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
+  .snap-item .snap-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
 
   .flag-list { display: flex; flex-direction: column; gap: 8px; }
-  .flag-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+  .flag-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; }
   .flag-name { font-size: 13px; font-weight: 600; }
-  .flag-count { font-size: 12.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .flag-count { font-size: 12.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; background: var(--page); padding: 3px 9px; border-radius: 20px; }
 
-  footer { color: var(--text-muted); font-size: 11.5px; margin-top: 20px; line-height: 1.6; }
+  footer { color: var(--text-muted); font-size: 11.5px; margin-top: 18px; line-height: 1.6; padding: 0 2px; }
 
   @media (max-width: 640px) {
     .stat-row { grid-template-columns: repeat(2, 1fr); }
-    .stat-tile .value { font-size: 22px; }
+    .stat-tile .value { font-size: 21px; }
+    header.top { align-items: center; }
   }
 </style>
 </head>
@@ -220,7 +256,7 @@
       <div>
         <h2 class="card-title">Aktivity podľa mesiaca</h2>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <div class="seg-toggle" id="garmin-metric-toggle">
           <button data-metric="counts" class="active">Počet</button>
           <button data-metric="km">Kilometre</button>
@@ -228,10 +264,10 @@
         <button class="table-toggle" data-table-for="garmin">Tabuľka</button>
       </div>
     </div>
-    <p class="card-note">Garmin export, február–august 2026, mesačné súčty. Hokej ani ranná aktivácia nie sú vlastné typy v Garmine/Strave — dourčené podľa dĺžky, času a názvu aktivity. Nezaradené čaká na tvoje dourčenie (nižšie).</p>
+    <p class="card-note">Garmin export, február–august 2026, mesačné súčty. Hokej ani ranná aktivácia nie sú vlastné typy v Garmine/Strave — dourčené podľa dĺžky, času a názvu aktivity. Nezaradené čaká na tvoje dourčenie (nižšie). Klikni na položku v legende — vyradíš ju z grafu.</p>
     <div class="legend" id="garmin-legend"></div>
-    <div id="garmin-chart"></div>
-    <div id="garmin-table" class="hidden"></div>
+    <div class="chart-holder" id="garmin-chart"></div>
+    <div class="table-scroll hidden" id="garmin-table"></div>
   </section>
 
   <section class="card">
@@ -247,9 +283,9 @@
       </div>
       <button class="table-toggle" data-table-for="hr">Tabuľka</button>
     </div>
-    <p class="card-note">Medián tepu v okne 23:00–06:00, pripísaný k rannému dátumu. Ultrahuman prsteň, 6.–14. 8. 2026. 6. 8. bez nočnej hodnoty — prsteň nasadený až cez deň. 14. 8. je zo screenshotu, ten túto metriku neukazuje.</p>
-    <div id="hr-chart"></div>
-    <div id="hr-table" class="hidden"></div>
+    <p class="card-note">Medián tepu v okne 23:00–06:00, pripísaný k rannému dátumu. Ultrahuman prsteň, 6.–14. 8. 2026. 6. 8. bez nočnej hodnoty — prsteň nasadený až cez deň. 14. 8. je zo screenshotu, ten túto metriku neukazuje. Klepni/podrž na grafe pre presné čísla.</p>
+    <div class="chart-holder" id="hr-chart"></div>
+    <div class="table-scroll hidden" id="hr-table"></div>
   </section>
 
   <section class="card">
@@ -260,14 +296,14 @@
       <button class="table-toggle" data-table-for="steps">Tabuľka</button>
     </div>
     <p class="card-note">Súčet za deň, Ultrahuman. 6. 8. je neúplný deň (prsteň nasadený až cez deň).</p>
-    <div id="steps-chart"></div>
-    <div id="steps-table" class="hidden"></div>
+    <div class="chart-holder" id="steps-chart"></div>
+    <div class="table-scroll hidden" id="steps-table"></div>
   </section>
 
   <section class="card">
     <div class="card-head"><h2 class="card-title">Posilňovňa — cviky</h2></div>
     <p class="card-note">Tréningy A/B, exportované 14. 8. 2026 (dávka za týždeň). Garminova Sila zachytáva len súhrn tréningu, toto je detail po cvikoch.</p>
-    <div id="posilnovna-table"></div>
+    <div class="table-scroll" id="posilnovna-table"></div>
   </section>
 
   <section class="card">
@@ -367,9 +403,84 @@ themeBtn.textContent = currentTheme() === 'dark' ? 'Svetlý režim' : 'Tmavý re
 document.getElementById('meta-updated').textContent = 'Naposledy aktualizované: 14. 8. 2026 (testovací beh, prvé screenshoty)';
 document.getElementById('footer-note').textContent = 'Garmin: plný export aktivít, 180 záznamov, február–august 2026. Ultrahuman: ranný screenshot, 6.–14. 8. 2026. Tréningy A/B: treningy.json, dávka 6.–13. 8. 2026. Dashboard je statický snímok k 14. 8. 2026 — obnoví sa pri ďalšom behu.';
 
-// ---------- stat tiles ----------
+// ---------- number formatting ----------
 function fmt(n, d=0) { return n.toLocaleString('sk-SK', {minimumFractionDigits:d, maximumFractionDigits:d}); }
 
+// ---------- tooltip system (mouse hover + touch tap, viewport-clamped) ----------
+const tooltipEl = document.getElementById('tooltip');
+let pinned = false;
+
+function positionTooltip(x, y) {
+  const pad = 12;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const r = tooltipEl.getBoundingClientRect();
+  let left = x + 16, top = y - 14;
+  if (left + r.width + pad > vw) left = x - r.width - 16;
+  if (left < pad) left = pad;
+  if (top + r.height + pad > vh) top = vh - r.height - pad;
+  if (top < pad) top = pad;
+  tooltipEl.style.left = left + 'px';
+  tooltipEl.style.top = top + 'px';
+}
+function showTooltip(x, y, contentEl) {
+  tooltipEl.innerHTML = '';
+  tooltipEl.appendChild(contentEl);
+  positionTooltip(x, y);
+  tooltipEl.classList.add('show');
+}
+function hideTooltip() { tooltipEl.classList.remove('show'); pinned = false; }
+
+document.addEventListener('pointerdown', (e) => {
+  if (pinned && !e.target.closest('[data-tt-target]')) hideTooltip();
+}, true);
+
+/**
+ * Wires hover (mouse/pen) + tap-to-pin (touch, and click) tooltip behaviour onto an SVG mark.
+ * activate()/deactivate() toggle the mark's own visual "hovered" state (e.g. brightness).
+ */
+function wireTooltip(el, buildContent, activate, deactivate) {
+  el.setAttribute('data-tt-target', '1');
+  el.style.cursor = 'pointer';
+  el.addEventListener('pointerenter', (e) => {
+    if (e.pointerType === 'touch') return;
+    activate && activate();
+    showTooltip(e.clientX, e.clientY, buildContent());
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch') return;
+    if (tooltipEl.classList.contains('show')) positionTooltip(e.clientX, e.clientY);
+  });
+  el.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'touch') return;
+    deactivate && deactivate();
+    hideTooltip();
+  });
+  el.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    activate && activate();
+    showTooltip(e.clientX, e.clientY, buildContent());
+    pinned = true;
+  });
+}
+
+function ttBox(dateText) {
+  const box = document.createElement('div');
+  const dt = document.createElement('div'); dt.className = 't-date'; dt.textContent = dateText;
+  box.appendChild(dt);
+  return box;
+}
+function ttRow(box, key, val, swatchColor) {
+  const rw = document.createElement('div'); rw.className = 't-row';
+  const k = document.createElement('span'); k.className = 't-key';
+  if (swatchColor) { const sw = document.createElement('span'); sw.className = 't-swatch'; sw.style.background = swatchColor; k.appendChild(sw); }
+  k.appendChild(document.createTextNode(key));
+  const v = document.createElement('span'); v.className = 't-val'; v.textContent = val;
+  rw.append(k, v);
+  box.appendChild(rw);
+  return box;
+}
+
+// ---------- stat tiles ----------
 function renderStats() {
   const g = DATA.garmin;
   let totalCount = 0, hockeyCount = 0;
@@ -384,7 +495,7 @@ function renderStats() {
 
   const tiles = [
     { label: 'Aktivít spolu', value: fmt(totalCount), sub: 'február–august, Garmin' },
-    { label: 'Odohratých hokejov', value: fmt(hockeyCount), sub: 'február–august, Garmin' },
+    { label: 'Odohraných hokejov', value: fmt(hockeyCount), sub: 'február–august, Garmin' },
     { label: 'Priemerný nočný tep', value: fmt(avgNight,1), sub: nights.length + ' nocí, Ultrahuman' },
     { label: 'Priemer krokov / deň', value: fmt(avgSteps,0), sub: steps.length + ' dní, Ultrahuman' },
   ];
@@ -401,16 +512,31 @@ function renderStats() {
   });
 }
 
-// ---------- tooltip helper ----------
-const tooltipEl = document.getElementById('tooltip');
-function showTooltip(x, y, html) {
-  tooltipEl.innerHTML = '';
-  tooltipEl.appendChild(html);
-  tooltipEl.style.left = (x + 14) + 'px';
-  tooltipEl.style.top = (y - 10) + 'px';
-  tooltipEl.classList.add('show');
+// ---------- SVG helpers ----------
+function makeSvg(W, H) {
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.style.aspectRatio = W + ' / ' + H;
+  return svg;
 }
-function hideTooltip() { tooltipEl.classList.remove('show'); }
+function svgXFromClientX(svg, clientX, W) {
+  const rect = svg.getBoundingClientRect();
+  const scale = W / rect.width;
+  return (clientX - rect.left) * scale;
+}
+
+function el(tag, text) { const e = document.createElement(tag); e.textContent = text; return e; }
+
+function niceNumber(v) {
+  if (v <= 5) return 5;
+  const pow = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / pow;
+  let f;
+  if (n <= 1) f = 1; else if (n <= 2) f = 2; else if (n <= 5) f = 5; else f = 10;
+  return f * pow;
+}
 
 // ---------- SVG stacked bar: Garmin ----------
 let garminMetric = 'counts';
@@ -422,13 +548,18 @@ function renderGarminLegend() {
   DATA.garmin.types.forEach((t, i) => {
     const item = document.createElement('div');
     item.className = 'legend-item' + (garminHidden.has(i) ? ' off' : '');
+    item.tabIndex = 0;
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-pressed', garminHidden.has(i) ? 'false' : 'true');
     const sw = document.createElement('span'); sw.className = 'swatch'; sw.style.background = seriesColor(i);
     const lab = document.createElement('span'); lab.textContent = t;
     item.append(sw, lab);
-    item.addEventListener('click', () => {
+    const toggle = () => {
       if (garminHidden.has(i)) garminHidden.delete(i); else garminHidden.add(i);
       renderGarmin();
-    });
+    };
+    item.addEventListener('click', toggle);
+    item.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
     el.appendChild(item);
   });
 }
@@ -437,76 +568,76 @@ function renderGarmin() {
   renderGarminLegend();
   const g = DATA.garmin;
   const dataset = g[garminMetric]; // months x types
-  const W = 1000, H = 300, padL = 44, padR = 12, padT = 10, padB = 34;
+  const isKm = garminMetric === 'km';
+  const W = 1000, H = 300, padL = 44, padR = 12, padT = 26, padB = 34;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const nMonths = g.months.length;
   const barSlot = plotW / nMonths;
-  const barW = Math.min(24, barSlot * 0.5);
+  const barW = Math.min(26, barSlot * 0.5);
 
   const totals = dataset.map(row => row.reduce((a,v,ti) => garminHidden.has(ti) ? a : a+v, 0));
   const maxTotal = Math.max(...totals, 1);
   const niceMax = niceNumber(maxTotal);
   const yScale = v => plotH - (v / niceMax) * plotH;
 
-  const svgns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(svgns, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('height', H);
+  const svg = makeSvg(W, H);
 
   const gridSteps = 4;
   for (let s = 0; s <= gridSteps; s++) {
     const val = (niceMax / gridSteps) * s;
     const y = padT + yScale(val);
-    const line = document.createElementNS(svgns, 'line');
+    const line = document.createElementNS(svg.namespaceURI, 'line');
     line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
     line.setAttribute('y1', y); line.setAttribute('y2', y);
     line.setAttribute('class', s === 0 ? 'baseline' : 'grid-line');
     svg.appendChild(line);
-    const lab = document.createElementNS(svgns, 'text');
+    const lab = document.createElementNS(svg.namespaceURI, 'text');
     lab.setAttribute('x', padL - 8); lab.setAttribute('y', y + 3);
     lab.setAttribute('text-anchor', 'end'); lab.setAttribute('class', 'axis-label');
-    lab.textContent = garminMetric === 'km' ? fmt(val,0) : fmt(val,0);
+    lab.textContent = fmt(val,0);
     svg.appendChild(lab);
   }
 
   dataset.forEach((row, mi) => {
     const cx = padL + barSlot * mi + barSlot / 2;
     let yCursor = plotH;
+    let anyVisible = false;
     row.forEach((v, ti) => {
       if (garminHidden.has(ti) || v <= 0) return;
+      anyVisible = true;
       const segH = Math.max(0, (v / niceMax) * plotH - 2); // 2px surface gap
       const y = padT + yCursor - (v / niceMax) * plotH;
       const isTop = ti === row.length - 1 || row.slice(ti+1).every((vv,jj) => garminHidden.has(ti+1+jj) || vv <= 0);
-      const rect = document.createElementNS(svgns, 'rect');
+      const rect = document.createElementNS(svg.namespaceURI, 'rect');
       rect.setAttribute('x', cx - barW/2);
       rect.setAttribute('y', y);
       rect.setAttribute('width', barW);
       rect.setAttribute('height', segH);
       rect.setAttribute('rx', isTop ? 4 : 0);
       rect.setAttribute('fill', seriesColor(ti));
-      rect.style.cursor = 'pointer';
-      rect.addEventListener('pointerenter', (e) => {
-        rect.style.filter = 'brightness(1.12)';
-        const box = document.createElement('div');
-        const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = g.months[mi] + ' 2026 — ' + g.types[ti];
-        const rw = document.createElement('div'); rw.className='t-row';
-        const val = document.createElement('span'); val.className='t-val';
-        val.textContent = garminMetric === 'km' ? fmt(v,2) + ' km' : fmt(v,0) + 'x';
-        rw.appendChild(val);
-        box.append(dt, rw);
-        showTooltip(e.clientX, e.clientY, box);
-      });
-      rect.addEventListener('pointermove', (e) => {
-        tooltipEl.style.left = (e.clientX + 14) + 'px';
-        tooltipEl.style.top = (e.clientY - 10) + 'px';
-      });
-      rect.addEventListener('pointerleave', () => { rect.style.filter = ''; hideTooltip(); });
+      wireTooltip(rect,
+        () => {
+          const box = ttBox(g.months[mi] + ' 2026');
+          return ttRow(box, g.types[ti], isKm ? fmt(v,2) + ' km' : fmt(v,0) + '×', seriesColor(ti));
+        },
+        () => rect.style.filter = 'brightness(1.14)',
+        () => rect.style.filter = ''
+      );
       svg.appendChild(rect);
       yCursor -= (v / niceMax) * plotH;
     });
 
-    const mlab = document.createElementNS(svgns, 'text');
+    if (anyVisible) {
+      const total = totals[mi];
+      const topY = padT + yCursor - 6;
+      const tlab = document.createElementNS(svg.namespaceURI, 'text');
+      tlab.setAttribute('x', cx); tlab.setAttribute('y', Math.max(topY, padT - 6));
+      tlab.setAttribute('text-anchor', 'middle'); tlab.setAttribute('class', 'total-label');
+      tlab.textContent = isKm ? fmt(total,1) : fmt(total,0);
+      svg.appendChild(tlab);
+    }
+
+    const mlab = document.createElementNS(svg.namespaceURI, 'text');
     mlab.setAttribute('x', cx); mlab.setAttribute('y', H - padB + 18);
     mlab.setAttribute('text-anchor', 'middle'); mlab.setAttribute('class', 'axis-label');
     mlab.textContent = g.months[mi];
@@ -544,17 +675,6 @@ function renderGarminTable() {
   holder.appendChild(table);
 }
 
-function el(tag, text) { const e = document.createElement(tag); e.textContent = text; return e; }
-
-function niceNumber(v) {
-  if (v <= 5) return 5;
-  const pow = Math.pow(10, Math.floor(Math.log10(v)));
-  const n = v / pow;
-  let f;
-  if (n <= 1) f = 1; else if (n <= 2) f = 2; else if (n <= 5) f = 5; else f = 10;
-  return f * pow;
-}
-
 document.getElementById('garmin-metric-toggle').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-metric]');
   if (!btn) return;
@@ -589,7 +709,7 @@ function renderSnapshot() {
   });
 }
 
-// ---------- Line chart: night HR ----------
+// ---------- Line chart: night HR (with crosshair) ----------
 function renderHR() {
   const rows = DATA.regen;
   const W = 1000, H = 260, padL = 40, padR = 16, padT = 16, padB = 34;
@@ -601,10 +721,8 @@ function renderHR() {
   const xScale = i => padL + (i / (rows.length - 1)) * plotW;
   const yScale = v => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-  const svgns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(svgns, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+  const svg = makeSvg(W, H);
+  const svgns = svg.namespaceURI;
 
   const steps = 4;
   for (let s = 0; s <= steps; s++) {
@@ -627,7 +745,7 @@ function renderHR() {
   rows.forEach((r, i) => {
     if (r.night_hr == null) return;
     const x = xScale(i), y = yScale(r.night_hr);
-    pts.push([x,y,i,r]);
+    pts.push({x, y, i, r});
     pathD += (pathD === '' ? 'M' : 'L') + x + ' ' + y + ' ';
   });
   const path = document.createElementNS(svgns, 'path');
@@ -639,40 +757,75 @@ function renderHR() {
   path.setAttribute('stroke-linejoin', 'round');
   svg.appendChild(path);
 
-  pts.forEach(([x,y,i,r]) => {
+  pts.forEach(({x,y}) => {
     const ring = document.createElementNS(svgns, 'circle');
     ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 6);
     ring.setAttribute('fill', cssVar('--surface-1'));
+    ring.style.pointerEvents = 'none';
     svg.appendChild(ring);
     const dot = document.createElementNS(svgns, 'circle');
     dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 4);
     dot.setAttribute('fill', seriesColor(0));
+    dot.style.pointerEvents = 'none';
     svg.appendChild(dot);
-    const hit = document.createElementNS(svgns, 'circle');
-    hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 14);
-    hit.setAttribute('fill', 'transparent'); hit.style.cursor = 'pointer';
-    hit.addEventListener('pointerenter', (e) => {
-      const box = document.createElement('div');
-      const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = fmtDate(r.date);
-      const rw = document.createElement('div'); rw.className='t-row';
-      const key = document.createElement('span'); key.className='t-key';
-      const ln = document.createElement('span'); ln.className='t-line'; ln.style.background = seriesColor(0);
-      key.append(ln, document.createTextNode('medián'));
-      const val = document.createElement('span'); val.className='t-val'; val.textContent = fmt(r.night_hr,1) + ' bpm';
-      rw.append(key, val);
-      const rw2 = document.createElement('div'); rw2.className='t-row';
-      const key2 = document.createElement('span'); key2.className='t-key'; key2.textContent = 'minimum';
-      const val2 = document.createElement('span'); val2.className='t-val'; val2.textContent = fmt(r.night_hr_min,0) + ' bpm';
-      rw2.append(key2, val2);
-      box.append(dt, rw, rw2);
-      showTooltip(e.clientX, e.clientY, box);
-    });
-    hit.addEventListener('pointermove', (e) => {
-      tooltipEl.style.left = (e.clientX + 14) + 'px'; tooltipEl.style.top = (e.clientY - 10) + 'px';
-    });
-    hit.addEventListener('pointerleave', hideTooltip);
-    svg.appendChild(hit);
   });
+
+  // crosshair (hidden until interaction)
+  const crossLine = document.createElementNS(svgns, 'line');
+  crossLine.setAttribute('y1', padT); crossLine.setAttribute('y2', padT + plotH);
+  crossLine.setAttribute('stroke', cssVar('--text-muted'));
+  crossLine.setAttribute('stroke-width', '1');
+  crossLine.setAttribute('stroke-dasharray', '3,3');
+  crossLine.style.opacity = '0';
+  crossLine.style.pointerEvents = 'none';
+  svg.appendChild(crossLine);
+
+  const crossDot = document.createElementNS(svgns, 'circle');
+  crossDot.setAttribute('r', '6');
+  crossDot.setAttribute('fill', seriesColor(0));
+  crossDot.setAttribute('stroke', cssVar('--surface-1'));
+  crossDot.setAttribute('stroke-width', '2.5');
+  crossDot.style.opacity = '0';
+  crossDot.style.pointerEvents = 'none';
+  svg.appendChild(crossDot);
+
+  function nearestPoint(xPix) {
+    let best = pts[0], bestD = Infinity;
+    pts.forEach(p => { const d = Math.abs(p.x - xPix); if (d < bestD) { bestD = d; best = p; } });
+    return best;
+  }
+  function buildContent(r) {
+    const box = ttBox(fmtDate(r.date));
+    ttRow(box, 'medián', fmt(r.night_hr,1) + ' bpm', seriesColor(0));
+    ttRow(box, 'minimum', fmt(r.night_hr_min,0) + ' bpm');
+    return box;
+  }
+  function showAt(clientX, clientY) {
+    const xPix = svgXFromClientX(svg, clientX, W);
+    const p = nearestPoint(xPix);
+    crossLine.setAttribute('x1', p.x); crossLine.setAttribute('x2', p.x);
+    crossLine.style.opacity = '1';
+    crossDot.setAttribute('cx', p.x); crossDot.setAttribute('cy', p.y);
+    crossDot.style.opacity = '1';
+    showTooltip(clientX, clientY, buildContent(p.r));
+  }
+  function hideAll() {
+    crossLine.style.opacity = '0';
+    crossDot.style.opacity = '0';
+    hideTooltip();
+  }
+
+  const overlay = document.createElementNS(svgns, 'rect');
+  overlay.setAttribute('x', padL); overlay.setAttribute('y', 0);
+  overlay.setAttribute('width', plotW); overlay.setAttribute('height', H);
+  overlay.setAttribute('fill', 'transparent');
+  overlay.setAttribute('data-tt-target', '1');
+  overlay.style.cursor = 'crosshair';
+  overlay.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') showAt(e.clientX, e.clientY); });
+  overlay.addEventListener('pointermove', (e) => { if (e.pointerType !== 'touch') showAt(e.clientX, e.clientY); });
+  overlay.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') hideAll(); });
+  overlay.addEventListener('pointerdown', (e) => { e.stopPropagation(); showAt(e.clientX, e.clientY); pinned = true; });
+  svg.appendChild(overlay);
 
   rows.forEach((r, i) => {
     if (i % Math.ceil(rows.length / 9) !== 0 && i !== rows.length - 1) return;
@@ -711,16 +864,14 @@ function renderHRTable() {
 // ---------- Bar chart: steps ----------
 function renderSteps() {
   const rows = DATA.regen;
-  const W = 1000, H = 260, padL = 52, padR = 16, padT = 10, padB = 34;
+  const W = 1000, H = 260, padL = 52, padR = 16, padT = 22, padB = 34;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const barSlot = plotW / rows.length;
-  const barW = Math.min(24, barSlot * 0.55);
+  const barW = Math.min(28, barSlot * 0.55);
   const maxV = niceNumber(Math.max(...rows.map(r => r.steps)));
 
-  const svgns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(svgns, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+  const svg = makeSvg(W, H);
+  const svgns = svg.namespaceURI;
 
   const steps4 = 4;
   for (let s = 0; s <= steps4; s++) {
@@ -747,22 +898,21 @@ function renderSteps() {
     rect.setAttribute('width', barW); rect.setAttribute('height', Math.max(0,h));
     rect.setAttribute('rx', 4);
     rect.setAttribute('fill', seriesColor(0));
-    rect.style.cursor = 'pointer';
-    rect.addEventListener('pointerenter', (e) => {
-      rect.style.filter = 'brightness(1.12)';
-      const box = document.createElement('div');
-      const dt = document.createElement('div'); dt.className='t-date'; dt.textContent = fmtDate(r.date);
-      const rw = document.createElement('div'); rw.className='t-row';
-      const val = document.createElement('span'); val.className='t-val'; val.textContent = fmt(r.steps,0) + ' krokov';
-      rw.appendChild(val);
-      box.append(dt, rw);
-      showTooltip(e.clientX, e.clientY, box);
-    });
-    rect.addEventListener('pointermove', (e) => {
-      tooltipEl.style.left = (e.clientX + 14) + 'px'; tooltipEl.style.top = (e.clientY - 10) + 'px';
-    });
-    rect.addEventListener('pointerleave', () => { rect.style.filter=''; hideTooltip(); });
+    wireTooltip(rect,
+      () => {
+        const box = ttBox(fmtDate(r.date));
+        return ttRow(box, 'kroky', fmt(r.steps,0));
+      },
+      () => rect.style.filter = 'brightness(1.14)',
+      () => rect.style.filter = ''
+    );
     svg.appendChild(rect);
+
+    const tlab = document.createElementNS(svgns, 'text');
+    tlab.setAttribute('x', cx); tlab.setAttribute('y', y - 8);
+    tlab.setAttribute('text-anchor', 'middle'); tlab.setAttribute('class', 'total-label');
+    tlab.textContent = fmt(r.steps,0);
+    svg.appendChild(tlab);
 
     const lab = document.createElementNS(svgns, 'text');
     lab.setAttribute('x', cx); lab.setAttribute('y', H - padB + 18);
@@ -829,7 +979,7 @@ function renderFlags() {
   Object.entries(DATA.nezaradene).forEach(([name, count]) => {
     const row = document.createElement('div'); row.className = 'flag-row';
     const nm = document.createElement('div'); nm.className = 'flag-name'; nm.textContent = name;
-    const ct = document.createElement('div'); ct.className = 'flag-count'; ct.textContent = count + 'x';
+    const ct = document.createElement('div'); ct.className = 'flag-count'; ct.textContent = count + '×';
     row.append(nm, ct);
     list.appendChild(row);
   });
